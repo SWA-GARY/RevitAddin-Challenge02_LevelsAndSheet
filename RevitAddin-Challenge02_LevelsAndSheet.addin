@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Text>Command RevitAddin-Challenge02_LevelsAndSheet</Text>
+    <Description>Some description for RevitAddin-Challenge02_LevelsAndSheet</Description>
+    <Assembly>RevitAddin-Challenge02_LevelsAndSheet.dll</Assembly>
+    <FullClassName>RevitAddin_Challenge02_LevelsAndSheet.CmdProjectSetup</FullClassName>
+    <ClientId>28abaaec-1ddf-4490-9a1f-289b09b9dab8</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+  <AddIn Type="Application">
+    <Name>Application RevitAddin-Challenge02_LevelsAndSheet</Name>
+    <Assembly>RevitAddin-Challenge02_LevelsAndSheet.dll</Assembly>
+    <FullClassName>RevitAddin_Challenge02_LevelsAndSheet.App</FullClassName>
+    <ClientId>9feb3ffb-d2f7-40af-b405-e7fa802fe383</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+</RevitAddIns>
