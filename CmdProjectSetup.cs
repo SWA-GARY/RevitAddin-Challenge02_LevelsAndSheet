@@ -10,7 +10,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
 using static Autodesk.Revit.DB.SpecTypeId;
-
+using Forms = System.Windows.Forms;
 #endregion
 
 namespace RevitAddin_Challenge02_LevelsAndSheet
@@ -33,8 +33,11 @@ namespace RevitAddin_Challenge02_LevelsAndSheet
             collector.OfCategory(BuiltInCategory.OST_TitleBlocks);
 
             //variables
-            string filepathLevels = ("C:\\Users\\GARY\\Downloads\\RAB_Session_02_Challenge_Levels.csv");
-            string filePathSheets = ("C:\\Users\\GARY\\Downloads\\RAB_Session_02_Challenge_Sheets.csv");
+            string filepathLevels = ("");
+            string filePathSheets = ("");
+            XYZ insertPoint = new XYZ(2, 1, 0);
+            XYZ secondInsertPoint = new XYZ(0, 1, 0);
+
 
             //pick titleblock
             ElementId tblockId = collector.FirstElementId();
@@ -42,45 +45,147 @@ namespace RevitAddin_Challenge02_LevelsAndSheet
             Transaction t = new Transaction(doc);
             t.Start("Create level and sheet");
 
+            //dialog - setup
+            TaskDialog.Show("app", "load levels file");
+
+            Forms.OpenFileDialog selectlevelsfile = new Forms.OpenFileDialog();
+            selectlevelsfile.InitialDirectory = "c:\\";
+            selectlevelsfile.Filter = "CSV FILES|*.CSV|ALL FILES|*.*";
+            selectlevelsfile.Multiselect = false;
+
+            //open levels file
+           
+            
+            if (selectlevelsfile.ShowDialog() == Forms.DialogResult.OK)
+            {
+                filepathLevels = selectlevelsfile.FileName;
+
+            }
+
+            //dialog - setup
+            TaskDialog.Show("app", "load sheets file");
+
+            Forms.OpenFileDialog selectsheetsfile = new Forms.OpenFileDialog();
+            selectsheetsfile.InitialDirectory = "c:\\";
+            selectsheetsfile.Filter = "CSV FILES|*.CSV|ALL FILES|*.*";
+            selectsheetsfile.Multiselect = false;
+
+            /*open sheets file
+            if (selectsheetsfile.ShowDialog() == Forms.DialogResult.OK)
+            {
+                filePathSheets = selectsheetsfile.FileName;
+
+            }
+            */
             //read data
+            List <string[]> LevelList= new List<string[]>();
+            List<string[]> SheetsList = new List<string[]>();
 
             string[] fileLevelArray = System.IO.File.ReadAllLines(filepathLevels);
+            
             foreach(string rowString in fileLevelArray)
             {
+               //split cells
                 string[] cellString = rowString.Split(',');
-                string LevelName = cellString[0];
-                string elevation = cellString[1];
+                //add to list
+                LevelList.Add(cellString); 
+            }
+            //remove headers
+            LevelList.RemoveAt(0);
+            
+
+            //create rcp and plan views
+            FilteredElementCollector vftCollector = new FilteredElementCollector(doc);
+            vftCollector.OfClass(typeof(ViewFamilyType));
+
+            ViewFamilyType planvft = null;
+            ViewFamilyType rcpvft = null;
+
+            foreach (ViewFamilyType vft in vftCollector)
+            {
+                if (vft.ViewFamily == ViewFamily.FloorPlan)
+                    planvft = vft;
+
+                if (vft.ViewFamily == ViewFamily.CeilingPlan)
+                    rcpvft = vft;
+            }
+
+            //create levels
+            int rcpSheetNumber = 200;
+            
+
+            foreach (string[] rowString in LevelList)
+            {
+                string LevelName = rowString[0];
+                string elevation = rowString[1];
 
                 double elevationDouble = 0;
-                bool DidItParse = double.TryParse(elevation,out elevationDouble);
+                bool DidItParse = double.TryParse(elevation, out elevationDouble);
 
-                //create levels
                 double LevelHeight = elevationDouble;
                 Level mylevel = Level.Create(doc, LevelHeight);
                 mylevel.Name = LevelName;
+
+                ViewPlan planview = ViewPlan.Create(doc, planvft.Id, mylevel.Id);
+                planview.Name = LevelName+"PLAN";
+
+                ViewSheet newSheet = ViewSheet.Create(doc, tblockId);
+                newSheet.Name = LevelName;
+                newSheet.SheetNumber = "A100";
+               
+                Viewport newViewPort = Viewport.Create(doc, newSheet.Id, planview.Id, insertPoint);
+
+                ViewPlan RCPview = ViewPlan.Create(doc, rcpvft.Id,mylevel.Id);
+                RCPview.Name= "RCP_"+LevelName;
+
+                ViewSheet newCeilingSheet = ViewSheet.Create(doc, tblockId);
+                newCeilingSheet.Name = "RCP_" + LevelName;
+                newCeilingSheet.SheetNumber = "A200";
+
+                Viewport newrcpPort = Viewport.Create(doc, newCeilingSheet.Id, RCPview.Id, insertPoint);
+
+
+
+
+
+
             }
-            
+                
+            /*setup sheets list
             string[] fileSheetArray = System.IO.File.ReadAllLines(filePathSheets);
             foreach (string rowString in fileSheetArray)
             {
                 string[] cellString = rowString.Split(',');
-                string SheetNumber = cellString[0];
-                string SheetName = cellString[1];
-                
+                SheetsList.Add(cellString);
+            }
+
+            //remove headers
+            SheetsList.RemoveAt(0);
+
+            foreach (string[] rowstring in SheetsList)
+            {
+                string SheetNumber = rowstring[0];
+                string SheetName = rowstring[1];
+
                 //create sheets
 
                 ViewSheet MySheet = ViewSheet.Create(doc, tblockId);
                 MySheet.Name = SheetName;
                 MySheet.SheetNumber = SheetNumber;
+                
             }
+            */
+            
+            
+            
 
             var levelcount = 0;
             levelcount = fileLevelArray.Count();
 
-            var Sheetcount = 0;
-            Sheetcount = fileSheetArray.Count();
+           // var Sheetcount = 0;
+           // Sheetcount = fileSheetArray.Count();
 
-            TaskDialog.Show("app", levelcount + " levels & "+ Sheetcount +" sheets created");
+            TaskDialog.Show("app", levelcount + " levels & sheets created");
             t.Commit();
             t.Dispose();
 
