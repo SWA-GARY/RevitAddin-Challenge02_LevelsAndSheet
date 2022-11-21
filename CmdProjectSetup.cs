@@ -111,8 +111,10 @@ namespace RevitAddin_Challenge02_LevelsAndSheet
             }
 
             //create levels
-            int rcpSheetNumber = 200;
-            
+            int FLOORNUMBER = 0;
+            int plannumber = 100;
+            int RCPnumber = 200;
+
 
             foreach (string[] rowString in LevelList)
             {
@@ -127,11 +129,13 @@ namespace RevitAddin_Challenge02_LevelsAndSheet
                 mylevel.Name = LevelName;
 
                 ViewPlan planview = ViewPlan.Create(doc, planvft.Id, mylevel.Id);
-                planview.Name = LevelName+"PLAN";
+                FLOORNUMBER++;
+                planview.Name = (FLOORNUMBER.ToString() + " FLOOR PLAN");
 
                 ViewSheet newSheet = ViewSheet.Create(doc, tblockId);
-                newSheet.Name = LevelName;
-                newSheet.SheetNumber = "A100";
+                newSheet.Name = planview.Name;
+                //plannumber++;
+                newSheet.SheetNumber = ("A"+plannumber++.ToString());
                
                 Viewport newViewPort = Viewport.Create(doc, newSheet.Id, planview.Id, insertPoint);
 
@@ -140,7 +144,7 @@ namespace RevitAddin_Challenge02_LevelsAndSheet
 
                 ViewSheet newCeilingSheet = ViewSheet.Create(doc, tblockId);
                 newCeilingSheet.Name = "RCP_" + LevelName;
-                newCeilingSheet.SheetNumber = "A200";
+                newCeilingSheet.SheetNumber = "A"+RCPnumber++.ToString();
 
                 Viewport newrcpPort = Viewport.Create(doc, newCeilingSheet.Id, RCPview.Id, insertPoint);
 
@@ -180,7 +184,7 @@ namespace RevitAddin_Challenge02_LevelsAndSheet
             
 
             var levelcount = 0;
-            levelcount = fileLevelArray.Count();
+            levelcount = fileLevelArray.Count()*2;
 
            // var Sheetcount = 0;
            // Sheetcount = fileSheetArray.Count();
