@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using static Autodesk.Revit.DB.SpecTypeId;
 using Forms = System.Windows.Forms;
 #endregion
@@ -35,17 +36,28 @@ namespace RevitAddin_Challenge02_LevelsAndSheet
             //variables
             string filepathLevels = ("");
             string filePathSheets = ("");
-            XYZ insertPoint = new XYZ(2, 1, 0);
-            XYZ secondInsertPoint = new XYZ(0, 1, 0);
-
-
             //pick titleblock
             ElementId tblockId = collector.FirstElementId();
+            
+
+            XYZ secondInsertPoint = new XYZ(0, 1, 0);
+            
+            /*BoundingBoxUV outline = tblockId.outline;
+            double x = (outline.Max.U + outline.Min.U)/2;
+            double y = (outline.Max.V + outline.Min.V) / 2;
+            XYZ insertPoint = new XYZ(x, y, 0);*/
+
+
+
+
+
+
+            
 
             Transaction t = new Transaction(doc);
             t.Start("Create level and sheet");
 
-            //dialog - setup
+            //dialog - setup levels
             TaskDialog.Show("app", "load levels file");
 
             Forms.OpenFileDialog selectlevelsfile = new Forms.OpenFileDialog();
@@ -62,7 +74,7 @@ namespace RevitAddin_Challenge02_LevelsAndSheet
 
             }
 
-            //dialog - setup
+            //dialog - setup sheets
             TaskDialog.Show("app", "load sheets file");
 
             Forms.OpenFileDialog selectsheetsfile = new Forms.OpenFileDialog();
@@ -148,11 +160,6 @@ namespace RevitAddin_Challenge02_LevelsAndSheet
 
                 Viewport newrcpPort = Viewport.Create(doc, newCeilingSheet.Id, RCPview.Id, insertPoint);
 
-
-
-
-
-
             }
                 
             /*setup sheets list
@@ -196,6 +203,13 @@ namespace RevitAddin_Challenge02_LevelsAndSheet
 
 
             return Result.Succeeded;
+
+            
         }
+
+        
+        
+
+        
     }
 }
